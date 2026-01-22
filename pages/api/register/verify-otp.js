@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import User from '../../../models/User';
 import Driver from '../../../models/Driver';
 import TempUser from '../../../models/TempUser';
-import { parseForm } from '../../../lib/registerUtils'; 
+import { parseForm } from '../../../lib/registerUtils';
 import connectDB from '../../../lib/mongodb'
 export const config = { api: { bodyParser: false } };
 

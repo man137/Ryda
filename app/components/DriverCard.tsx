@@ -57,6 +57,11 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver, pickupCoords }) 
             </span>
             <span className="font-mono font-bold">{driver.vehicleNumber}</span>
             {driver.vehicleColor && <span>• {driver.vehicleColor}</span>}
+            {pickupCoords && driver.coords && (
+              <span className="text-blue-600 font-medium">
+                • {(calculateDistance(driver.coords, pickupCoords) * 1000).toFixed(0)}m away
+              </span>
+            )}
           </div>
           
           {(driver.vehicleBrand || driver.vehicleModel) && (

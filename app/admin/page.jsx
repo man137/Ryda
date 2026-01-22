@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
   Car,
@@ -17,7 +17,6 @@ import {
   MoreHorizontal,
   Download,
   RefreshCw,
-  AlertCircle,
 } from "lucide-react"
 
 // Assuming these are imported from your UI library (e.g., shadcn/ui)
@@ -30,72 +29,48 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 
 export default function AdminDashboard() {
+  const { data: session, status } = useSession()
   const router = useRouter()
-  const { data: session, status: sessionStatus } = useSession()
   const [drivers, setDrivers] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [isAuthorized, setIsAuthorized] = useState(false)
 
-  // Access control: Only allow owners/admins to access admin dashboard
+  // Check authentication and admin access
   useEffect(() => {
-    if (sessionStatus === "loading") return // Wait for session to load
-
-    if (sessionStatus === "unauthenticated" || session?.user?.accountType !== "owner") {
+    if (status === "loading") {
+      setIsAuthorized(false)
+      return
+    }
+    if (!session) {
+      setIsAuthorized(false)
+      router.push("/login")
+      return
+    }
+    if (session.user.accountType !== "owner") {
+      setIsAuthorized(false)
       router.push("/")
       return
     }
-  }, [sessionStatus, session, router])
-
-  // Show loading while checking access
-  if (sessionStatus === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking access...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Deny access if not authenticated as owner
-  if (sessionStatus === "unauthenticated" || session?.user?.accountType !== "owner") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-red-800 mb-2">Access Denied</h2>
-            <p className="text-red-600 mb-4">You don't have permission to access the admin dashboard.</p>
-            <p className="text-sm text-red-500 mb-4">Only owners can access this page.</p>
-            <button
-              onClick={() => router.push("/")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
-            >
-              Go Home
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
+    setIsAuthorized(true)
+  }, [session, status, router])
 
   // Fetch drivers from API
   const fetchDrivers = async () => {
     try {
       setLoading(true)
       // This is the endpoint that the missing backend logic (GET /api/drivers) now handles
-      const response = await fetch('/api/drivers') 
+      const response = await fetch('/api/drivers')
 
       if (!response.ok) {
         // This is the line that was throwing the error before the backend was fixed
-        throw new Error('Failed to fetch drivers') 
+        throw new Error('Failed to fetch drivers')
       }
 
       const data = await response.json()
-      setDrivers(data.drivers || []) 
+      setDrivers(data.drivers || [])
     } catch (error) {
       console.error('Error fetching drivers:', error)
       alert('Could not load driver data. Check server logs.')
@@ -105,11 +80,21 @@ export default function AdminDashboard() {
     }
   }
 
-
-  // Initial data fetch
+  // Initial data fetch - only fetch if user is authorized
   useEffect(() => {
-    fetchDrivers()
-  }, [])
+    if (isAuthorized) {
+      fetchDrivers()
+    }
+  }, [isAuthorized])
+
+  // Show loading while checking auth or if not authorized
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <RefreshCw className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
   // Statistics
   const totalDrivers = drivers.length

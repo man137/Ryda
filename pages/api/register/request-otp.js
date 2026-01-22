@@ -4,7 +4,7 @@ import { createTransport } from 'nodemailer';
 import User from '../../../models/User';
 import Driver from '../../../models/Driver';
 import TempUser from '../../../models/TempUser';
-import { parseForm, ensureDirectories, saveFile } from '../../../lib/registerUtils'; 
+import { parseForm, ensureDirectories, saveFile } from '../../../lib/registerUtils';
 import connectDB from '../../../lib/mongodb'
 // --- Nodemailer Transporter Setup ---
 const transporter = createTransport({

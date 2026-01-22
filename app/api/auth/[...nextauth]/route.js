@@ -22,12 +22,22 @@ const authOptions = {
       async authorize(credentials) {
         await dbConnect();
 
-        const { email, password, accountType } = credentials;
-        const Model = accountType === "driver" ? Driver : User;
+        const { email, password } = credentials;
 
-        const user = await Model.findOne({ email: email.toLowerCase().trim() })
+        // First check if it's a driver account
+        let user = await Driver.findOne({ email: email.toLowerCase().trim() })
           .select("+password")
           .lean();
+
+        let accountType = "driver";
+
+        if (!user) {
+          // If not a driver, check regular users
+          user = await User.findOne({ email: email.toLowerCase().trim() })
+            .select("+password")
+            .lean();
+          accountType = "user";
+        }
 
         if (!user) throw new Error("No account found with this email");
 
@@ -38,15 +48,18 @@ const authOptions = {
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) throw new Error("Invalid password");
 
+        // Use the accountType from the database, not from credentials
+        const actualAccountType = user.accountType || accountType;
+
         const userData = {
           id: user._id.toString(),
           name: user.name || `${user.firstName || ""} ${user.lastName || ""}`.trim(),
           email: user.email,
           image: user.profilePic || null,
-          accountType,
+          accountType: actualAccountType,
         };
 
-        if (accountType === "driver") {
+        if (actualAccountType === "driver") {
           userData.driverLicense = user.driverLicense;
           userData.vehicleModel = user.vehicleModel;
           userData.licensePlate = user.licensePlate;
@@ -94,8 +107,6 @@ const authOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-
-  url: process.env.NEXTAUTH_URL,
 
   pages: {
     signIn: "/login",

@@ -2,11 +2,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { 
+import {
   ArrowLeft, Car, User, Phone, Truck, MapPin, Clock, DollarSign,
   CheckCircle, AlertCircle, Navigation, Star, Calendar, TrendingUp,
   Wifi, WifiOff
 } from 'lucide-react';
+import { routeService } from '../../services/route.service';
 
 export default function DriverPage() {
   const params = useParams();
@@ -23,6 +24,7 @@ export default function DriverPage() {
   const [rideRequests, setRideRequests] = useState([]);
   const [rideCompleted, setRideCompleted] = useState(false);
   const [activeRide, setActiveRide] = useState(null);
+  const [realDistance, setRealDistance] = useState(null);
   const [status, setStatus] = useState('offline');
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [completionMessage, setCompletionMessage] = useState('');
@@ -252,31 +254,72 @@ export default function DriverPage() {
   }, [driver, driverId]);
 
   // Event Handlers
-  const handleAcceptRide = useCallback((ride) => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-      setError('Cannot accept ride - not connected to server');
-      return;
+const handleAcceptRide = useCallback(async (ride) => {
+  if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+    setError('Cannot accept ride - not connected to server');
+    return;
+  }
+
+  if (!currentLocation) {
+    setError('Cannot accept ride - location not available');
+    return;
+  }
+
+  socketRef.current.send(JSON.stringify({
+    type: 'ride_response',
+    rideId: ride.rideId,
+    accepted: true,
+    driverId,
+    coords: currentLocation,
+    timestamp: Date.now()
+  }));
+
+  // Ensure coordinates are in the correct format
+  const formattedRide = {
+    ...ride,
+    pickup: ride.pickup || ride.pickupCoords,
+    pickupCoords: ride.pickupCoords || ride.pickup
+  };
+
+  setActiveRide(formattedRide);
+  setStatus('in-ride');
+  setRideRequests([]);
+
+  // Calculate real distance using route service
+  if (ride.pickupCoords && ride.destinationCoords) {
+    try {
+      const routeData = await routeService.getRoute(ride.pickupCoords, ride.destinationCoords);
+      if (routeData) {
+        setRealDistance(routeData.distance);
+      }
+    } catch (error) {
+      console.error('Error calculating real distance:', error);
+    }
+  }
+
+  // Open Google Maps with directions to pickup location
+  if (ride.pickup || ride.pickupCoords) {
+    let pickupLat, pickupLng;
+    const coords = ride.pickup || ride.pickupCoords;
+    
+    if (Array.isArray(coords)) {
+      [pickupLat, pickupLng] = coords;
+    } else if (typeof coords === 'object') {
+      pickupLat = coords.lat || coords[0];
+      pickupLng = coords.lng || coords[1];
     }
 
-    if (!currentLocation) {
-      setError('Cannot accept ride - location not available');
-      return;
+    if (pickupLat && pickupLng) {
+      let url;
+      if (currentLocation) {
+        url = `https://www.google.com/maps/dir/?api=1&origin=${currentLocation.lat},${currentLocation.lng}&destination=${pickupLat},${pickupLng}&travelmode=driving`;
+      } else {
+        url = `https://www.google.com/maps/search/?api=1&query=${pickupLat},${pickupLng}`;
+      }
+      window.open(url, '_blank');
     }
-
-    socketRef.current.send(JSON.stringify({
-      type: 'ride_response',
-      rideId: ride.rideId,
-      accepted: true,
-      driverId,
-      coords: currentLocation,
-      timestamp: Date.now()
-    }));
-
-    setActiveRide(ride);
-    setStatus('in-ride');
-    setRideRequests([]);
-  }, [currentLocation, driverId]);
-
+  }
+}, [currentLocation, driverId]);
   const handleRejectRide = useCallback((rideId) => {
     if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
       console.error('Cannot reject ride - WebSocket not connected');
@@ -762,23 +805,120 @@ export default function DriverPage() {
     </div>
   );
 
-  const ActiveRideCard = () => activeRide && (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-      <h2 className="text-lg font-semibold text-blue-800 mb-4">Active Ride</h2>
-      <div className="space-y-2 mb-4">
-        <p><span className="font-medium">From:</span> {activeRide.pickupAddress}</p>
-        <p><span className="font-medium">To:</span> {activeRide.destinationAddress}</p>
-        <p><span className="font-medium">Fare:</span> ₹{activeRide.estimatedFare}</p>
-        <p><span className="font-medium">Passenger:</span> {activeRide.passengerName}</p>
+ const ActiveRideCard = () => activeRide && (
+  <div className="bg-white rounded-lg shadow-md p-6 border-2 border-blue-500">
+    <div className="flex items-center gap-2 mb-4">
+      <Car className="w-5 h-5 text-blue-600" />
+      <h3 className="text-lg font-semibold">Active Ride</h3>
+    </div>
+    
+    <div className="space-y-3 mb-4">
+      <div className="flex items-start gap-2">
+        <MapPin className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" />
+        <div>
+          <p className="text-xs text-gray-500">From:</p>
+          <p className="text-sm">{activeRide.pickupAddress}</p>
+        </div>
       </div>
+      
+      <div className="flex items-start gap-2">
+        <MapPin className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
+        <div>
+          <p className="text-xs text-gray-500">To:</p>
+          <p className="text-sm">{activeRide.destinationAddress}</p>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <DollarSign className="w-4 h-4 text-green-600" />
+        <p className="text-sm">Fare: ₹{activeRide.estimatedFare}</p>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <User className="w-4 h-4 text-blue-600" />
+        <p className="text-sm">Passenger: {activeRide.passengerName}</p>
+      </div>
+      
+      {realDistance && (
+        <div className="flex items-center gap-2">
+          <Navigation className="w-4 h-4 text-purple-600" />
+          <p className="text-sm">Real Distance: {realDistance} km</p>
+        </div>
+      )}
+    </div>
+    
+    <div className="flex gap-2">
+      <button
+        onClick={() => {
+          try {
+            // Extract coordinates - handle both array and object formats
+            let pickupLat, pickupLng;
+            
+            if (activeRide.pickup) {
+              // If pickup is an array [lat, lng]
+              if (Array.isArray(activeRide.pickup)) {
+                [pickupLat, pickupLng] = activeRide.pickup;
+              }
+              // If pickup is an object {lat, lng}
+              else if (typeof activeRide.pickup === 'object') {
+                pickupLat = activeRide.pickup.lat || activeRide.pickup[0];
+                pickupLng = activeRide.pickup.lng || activeRide.pickup[1];
+              }
+            }
+            
+            // Try pickupCoords if pickup didn't work
+            if (!pickupLat || !pickupLng) {
+              if (activeRide.pickupCoords) {
+                if (Array.isArray(activeRide.pickupCoords)) {
+                  [pickupLat, pickupLng] = activeRide.pickupCoords;
+                } else if (typeof activeRide.pickupCoords === 'object') {
+                  pickupLat = activeRide.pickupCoords.lat || activeRide.pickupCoords[0];
+                  pickupLng = activeRide.pickupCoords.lng || activeRide.pickupCoords[1];
+                }
+              }
+            }
+            
+            console.log('Pickup coordinates:', { pickupLat, pickupLng });
+            console.log('Current location:', currentLocation);
+            
+            if (pickupLat && pickupLng) {
+              let url;
+              
+              if (currentLocation && currentLocation.lat && currentLocation.lng) {
+                // Directions from current location to pickup
+                url = `https://www.google.com/maps/dir/?api=1&origin=${currentLocation.lat},${currentLocation.lng}&destination=${pickupLat},${pickupLng}&travelmode=driving`;
+              } else {
+                // Just open pickup location in maps
+                url = `https://www.google.com/maps/search/?api=1&query=${pickupLat},${pickupLng}`;
+              }
+              
+              console.log('Opening Google Maps:', url);
+              window.open(url, '_blank');
+            } else {
+              console.error('Invalid pickup coordinates:', activeRide);
+              alert('Unable to open directions - invalid coordinates');
+            }
+          } catch (error) {
+            console.error('Error opening Google Maps:', error);
+            alert('Failed to open Google Maps');
+          }
+        }}
+        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2"
+      >
+        <Navigation className="w-4 h-4" />
+        Get Directions
+      </button>
+      
       <button
         onClick={handleCompleteRide}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors"
+        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2"
       >
+        <CheckCircle className="w-4 h-4" />
         Complete Ride
       </button>
     </div>
-  );
+  </div>
+);
 
   const RideRequestsCard = () => rideRequests.length > 0 && (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -893,12 +1033,10 @@ export default function DriverPage() {
     </div>
   );
 
-  // Early returns for different states
   if (loading) return <LoadingScreen />;
   if (error && !driver) return <ErrorScreen />;
   if (!driver) return <NotFoundScreen />;
 
-  // Main render
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -922,16 +1060,16 @@ export default function DriverPage() {
           />
         )}
 
-        {/* Connection Status */}
+      
         <ConnectionStatus />
 
-        {/* Driver Info Card */}
+     
         <DriverInfoCard />
 
-        {/* Active Ride */}
+      
         <ActiveRideCard />
 
-        {/* Ride Requests */}
+  
         <RideRequestsCard />
 
         {/* Current Location */}
