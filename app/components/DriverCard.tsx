@@ -7,9 +7,10 @@ import { calculateDistance } from '../utils/coordinates';
 interface DriverCardProps {
   driver: Driver;
   pickupCoords: [number, number] | null;
+  onCancel?: () => void;
 }
 
-export const DriverCard: React.FC<DriverCardProps> = ({ driver, pickupCoords }) => {
+export const DriverCard: React.FC<DriverCardProps> = ({ driver, pickupCoords, onCancel }) => {
   const [eta, setEta] = useState(0);
 
   useEffect(() => {
@@ -96,15 +97,26 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver, pickupCoords }) 
             {driver.status === 'accepted' && 'Driver accepted your ride'}
           </span>
         </div>
-        {driver.phone && (
-          <a 
-            href={`tel:${driver.phone}`}
-            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            <i className="ri-phone-fill"></i>
-            <span>Call</span>
-          </a>
-        )}
+        <div className="flex items-center gap-4">
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="flex items-center space-x-1 text-red-500 hover:text-red-700 font-medium transition-colors"
+            >
+              <i className="ri-close-circle-line"></i>
+              <span>Cancel</span>
+            </button>
+          )}
+          {driver.phone && (
+            <a 
+              href={`tel:${driver.phone}`}
+              className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            >
+              <i className="ri-phone-fill"></i>
+              <span>Call</span>
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

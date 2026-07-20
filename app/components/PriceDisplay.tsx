@@ -31,45 +31,49 @@ export const PriceDisplay: React.FC<PriceDisplayProps> = ({
   session,
   isLoadingDriverDetails
 }) => (
-  <div className="mt-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
-    <h3 className="font-bold text-lg mb-3">Estimated Fare</h3>
-    <div className="flex justify-between items-center mb-4">
-      <div className="space-y-1">
-        <p className="text-gray-600 text-sm">
-          Distance: {(routeGeometry.distance / 1000).toFixed(1)} km
-        </p>
-        <p className="text-gray-600 text-sm">
-          Duration: {Math.round(routeGeometry.duration / 60)} min
-        </p>
-        <p className="text-gray-600 text-sm">
-          Rate: ₹{FARE_CONFIG.RATE_PER_KM} per km
+  <div className="w-full flex flex-col gap-4">
+    <div className="flex items-center justify-between">
+      <div>
+        <h3 className="font-bold text-lg text-slate-900 dark:text-white">Ride Options</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+          <span><i className="ri-route-line mr-1"></i>{(routeGeometry.distance / 1000).toFixed(1)} km</span>
+          <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+          <span><i className="ri-time-line mr-1"></i>{Math.round(routeGeometry.duration / 60)} min</span>
         </p>
       </div>
-      <div className="text-3xl font-bold text-green-600">₹{fare}</div>
+      <div className="text-right">
+        <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">₹{fare}</div>
+      </div>
     </div>
     
     {isFindingDriver ? (
       <FindingDriver onCancel={handleCancelRequest} />
     ) : driver ? (
       <>
-        <DriverCard driver={driver} pickupCoords={pickupCoords} />
+        <DriverCard driver={driver} pickupCoords={pickupCoords} onCancel={handleCancelRequest} />
         {rideStatus === 'in-progress' && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg">
-            <div className="flex items-center">
-              <i className="ri-car-line text-xl mr-2"></i>
-              <span className="font-medium">Ride in progress</span>
-            </div>
+          <div className="mt-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 rounded-xl flex items-center justify-center gap-2 shadow-sm">
+            <i className="ri-car-line text-lg animate-bounce"></i>
+            <span className="font-medium text-sm">Ride in progress</span>
           </div>
         )}
       </>
     ) : (
       <button 
-        className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-black py-3 rounded-lg text-lg font-semibold transition-colors"
+        className="w-full mt-2 py-3.5 bg-black dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         onClick={handleRequestRide}
         disabled={!session || isLoadingDriverDetails}
       >
-        {!session ? 'Please login to request ride' : 
-         isLoadingDriverDetails ? 'Loading driver details...' : 'Request Ryda'}
+        {!session ? 'Login to Request Ride' : 
+         isLoadingDriverDetails ? (
+           <>
+             <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+             </svg>
+             <span>Loading driver...</span>
+           </>
+         ) : 'Confirm Ride'}
       </button>
     )}
   </div>

@@ -5,9 +5,18 @@ import { useSession } from 'next-auth/react';
 import {
   ArrowLeft, Car, User, Phone, Truck, MapPin, Clock, DollarSign,
   CheckCircle, AlertCircle, Navigation, Star, Calendar, TrendingUp,
-  Wifi, WifiOff
+  Wifi, WifiOff, XCircle
 } from 'lucide-react';
 import { routeService } from '../../services/route.service';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "../../../components/ui/dialog";
 
 export default function DriverPage() {
   const params = useParams();
@@ -28,6 +37,32 @@ export default function DriverPage() {
   const [status, setStatus] = useState('offline');
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [completionMessage, setCompletionMessage] = useState('');
+  
+  // Cancellation UI State
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [customCancelReason, setCustomCancelReason] = useState("");
+
+  // Restore active ride on mount
+  useEffect(() => {
+    const savedRide = localStorage.getItem("driverActiveRide");
+    if (savedRide) {
+      try {
+        const ride = JSON.parse(savedRide);
+        setActiveRide(ride);
+        setStatus("in-ride");
+      } catch {}
+    }
+  }, []);
+
+  // Persist active ride when it changes
+  useEffect(() => {
+    if (activeRide) {
+      localStorage.setItem("driverActiveRide", JSON.stringify(activeRide));
+    } else {
+      localStorage.removeItem("driverActiveRide");
+    }
+  }, [activeRide]);
 
   // Refs
   const socketRef = useRef(null);
@@ -146,7 +181,7 @@ export default function DriverPage() {
         }
       },
       (error) => {
-        console.error('Geolocation error:', error);
+        console.warn('Geolocation warning - unable to fetch exact location:', error.message || "Unknown error");
         const errorMessages = {
           [error.PERMISSION_DENIED]: 'Location permission denied. Please enable location access.',
           [error.POSITION_UNAVAILABLE]: 'Location information unavailable',
@@ -210,6 +245,9 @@ export default function DriverPage() {
               if (activeRide?.rideId === data.rideId) {
                 setActiveRide(null);
                 setStatus('available');
+                setError(`Ride was canceled by rider. Reason: ${data.reason}`);
+                // Clear error after 5s
+                setTimeout(() => setError(''), 5000);
               }
               break;
 
@@ -373,6 +411,29 @@ const handleAcceptRide = useCallback(async (ride) => {
     }, 3000);
 
   }, [activeRide, driverId, driver]);
+
+  const handleCancelRide = useCallback(() => {
+    if (!socketRef.current || !activeRide) return;
+
+    const finalReason = cancelReason === "Other" ? customCancelReason : cancelReason;
+    if (!finalReason) {
+      setError("Please select or enter a reason for cancellation.");
+      return;
+    }
+
+    socketRef.current.send(JSON.stringify({
+      type: 'cancel_ride',
+      rideId: activeRide.rideId,
+      reason: finalReason,
+      canceledBy: 'driver'
+    }));
+
+    setActiveRide(null);
+    setStatus('available');
+    setIsCancelDialogOpen(false);
+    setCancelReason("");
+    setCustomCancelReason("");
+  }, [activeRide, cancelReason, customCancelReason]);
 
   const toggleOnlineStatus = useCallback(async () => {
     if (!driver?.isApproved || !driver?.isActive) {
@@ -908,17 +969,74 @@ const handleAcceptRide = useCallback(async (ride) => {
         <Navigation className="w-4 h-4" />
         Get Directions
       </button>
-      
-      <button
-        onClick={handleCompleteRide}
-        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2"
-      >
-        <CheckCircle className="w-4 h-4" />
-        Complete Ride
-      </button>
-    </div>
-  </div>
-);
+            <div className="flex gap-4">
+            <button
+              onClick={() => setIsCancelDialogOpen(true)}
+              className="flex-1 bg-red-100 text-red-600 font-semibold py-3 rounded-lg hover:bg-red-200 transition-colors"
+            >
+              Cancel Ride
+            </button>
+            <button
+              onClick={handleCompleteRide}
+              className="flex-1 bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-600/30"
+            >
+              <CheckCircle className="h-5 w-5" />
+              Complete Ride
+            </button>
+          </div>
+          
+          <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Cancel Ride</DialogTitle>
+                <DialogDescription>
+                  Please select a reason for canceling this ride. This helps us improve the experience.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                {["Rider isn't here", "Vehicle issue", "Traffic/Route blocked", "Other"].map((reason) => (
+                  <button
+                    key={reason}
+                    onClick={() => setCancelReason(reason)}
+                    className={`text-left px-4 py-3 rounded-lg border transition-all ${
+                      cancelReason === reason 
+                        ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" 
+                        : "border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                    }`}
+                  >
+                    {reason}
+                  </button>
+                ))}
+                {cancelReason === "Other" && (
+                  <input
+                    type="text"
+                    placeholder="Please specify..."
+                    value={customCancelReason}
+                    onChange={(e) => setCustomCancelReason(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus-visible:ring-blue-800"
+                  />
+                )}
+              </div>
+              <DialogFooter>
+                <button
+                  onClick={() => setIsCancelDialogOpen(false)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors mr-2"
+                >
+                  Keep Ride
+                </button>
+                <button
+                  onClick={handleCancelRide}
+                  disabled={!cancelReason || (cancelReason === "Other" && !customCancelReason)}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  Confirm Cancel
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    );
 
   const RideRequestsCard = () => rideRequests.length > 0 && (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -1033,9 +1151,48 @@ const handleAcceptRide = useCallback(async (ride) => {
     </div>
   );
 
-  if (loading) return <LoadingScreen />;
-  if (error && !driver) return <ErrorScreen />;
-  if (!driver) return <NotFoundScreen />;
+  if (sessionStatus === "loading" || loading) {
+    return (
+      <div className="h-screen w-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto"></div>
+          <p className="text-gray-500 font-medium">Loading Driver Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !driver) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Dashboard</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!driver) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <User className="h-16 w-16 text-gray-400 mb-4" />
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Driver Not Found</h2>
+        <p className="text-gray-600 mb-6 text-center">We couldn't find your driver profile.</p>
+        <button 
+          onClick={() => router.push('/')}
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Return Home
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

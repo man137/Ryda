@@ -133,7 +133,6 @@ export default async function handler(req, res) {
 
   try {
     await connectDB();
-
     // Parse the multipart form data
     const { fields, files } = await parseForm(req);
     
@@ -155,13 +154,12 @@ export default async function handler(req, res) {
       }
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(userData.email)) {
       return res.status(400).json({ message: 'Please provide a valid email address' });
     }
 
-    // Validate password strength
+  
     if (userData.password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }

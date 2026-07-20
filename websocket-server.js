@@ -171,6 +171,40 @@ wss.on('connection', (ws, req) => {
           break;
         }
 
+        case 'cancel_ride': {
+          const { rideId, reason, canceledBy } = message;
+          const rideInfo = activeRides.get(rideId) || rides.get(rideId);
+          
+          if (rideInfo) {
+            // Notify the other party
+            if (canceledBy === 'client' && rideInfo.driverId) {
+              sendToDriver(rideInfo.driverId, {
+                type: 'ride_canceled',
+                rideId,
+                reason,
+                canceledBy
+              });
+              // Reset driver status
+              if (drivers.has(rideInfo.driverId)) {
+                drivers.get(rideInfo.driverId).data.status = 'available';
+              }
+            } else if (canceledBy === 'driver' && rideInfo.clientId) {
+              sendToClient(rideInfo.clientId, {
+                type: 'ride_canceled',
+                rideId,
+                reason,
+                canceledBy
+              });
+            }
+            
+            // Delete from active and pending rides
+            activeRides.delete(rideId);
+            rides.delete(rideId);
+            console.log(`Ride ${rideId} canceled by ${canceledBy}. Reason: ${reason}`);
+          }
+          break;
+        }
+
         case 'ping':
           send(ws, { type: 'pong', timestamp: Date.now() });
           break;

@@ -103,7 +103,12 @@ export const useStableWebSocket = (
         setTimeout(() => {
           const queue = [...messageQueueRef.current];
           messageQueueRef.current = [];
-          queue.forEach(msg => sendMessage(msg));
+          queue.forEach(msg => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify(msg));
+              console.log('📤 Flushed queued message:', msg.type);
+            }
+          });
         }, 100);
 
         // Heartbeat interval
