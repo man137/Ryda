@@ -25,49 +25,44 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver, pickupCoords, on
   }, [driver.coords, driver.estimatedArrival, pickupCoords]);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 mb-4 border border-gray-200">
+    <div className="card-light rounded-2xl p-5 mb-4 relative overflow-hidden group">
       <div className="flex items-center space-x-4">
-        <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
+        <div className="w-14 h-14 rounded-2xl border border-gray-100 bg-gray-100 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
           {driver.profileImage ? (
             <img 
               src={driver.profileImage} 
               alt={driver.name} 
-              className="w-12 h-12 rounded-full object-cover" 
+              className="w-14 h-14 object-cover" 
             />
           ) : (
-            <i className="ri-user-fill text-gray-600 text-xl"></i>
+            <i className="ri-user-fill text-gray-400 text-2xl"></i>
           )}
         </div>
         
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-lg">{driver.name}</h3>
-            <div className="flex items-center space-x-1">
-              <i className="ri-star-fill text-yellow-400"></i>
-              <span className="font-medium">{driver.rating.toFixed(1)}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-bold text-lg text-gray-900 truncate">{driver.name}</h3>
+            <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full flex-shrink-0">
+              <i className="ri-star-fill text-amber-500 text-sm"></i>
+              <span className="font-bold text-sm text-amber-700">{driver.rating.toFixed(1)}</span>
               {driver.totalRides && (
-                <span className="text-sm text-gray-500">({driver.totalRides} rides)</span>
+                <span className="text-xs text-amber-600/80">({driver.totalRides})</span>
               )}
             </div>
           </div>
           
-          <div className="flex items-center space-x-4 text-gray-600 text-sm">
-            <span className="flex items-center">
-              <i className="ri-car-line mr-1"></i>
+          <div className="flex items-center flex-wrap gap-2 text-sm mt-1.5">
+            <span className="flex items-center text-gray-600 font-medium">
+              <i className="ri-car-line mr-1.5 text-gray-500"></i>
               {driver.vehicleType}
             </span>
-            <span className="font-mono font-bold">{driver.vehicleNumber}</span>
-            {driver.vehicleColor && <span>• {driver.vehicleColor}</span>}
-            {pickupCoords && driver.coords && (
-              <span className="text-blue-600 font-medium">
-                • {(calculateDistance(driver.coords, pickupCoords) * 1000).toFixed(0)}m away
-              </span>
-            )}
+            <span className="bg-gray-100 px-2 py-0.5 rounded-lg font-mono font-bold tracking-wider text-xs text-gray-700">{driver.vehicleNumber}</span>
+            {driver.vehicleColor && <span className="text-gray-400 text-xs">• {driver.vehicleColor}</span>}
           </div>
           
           {(driver.vehicleBrand || driver.vehicleModel) && (
-            <div className="flex items-center space-x-2 text-gray-600 text-sm mt-1">
-              <i className="ri-car-fill mr-1"></i>
+            <div className="flex items-center gap-1.5 text-gray-400 text-xs mt-1.5">
+              <i className="ri-steering-2-line"></i>
               <span>
                 {driver.vehicleBrand && driver.vehicleBrand !== 'Unknown' ? driver.vehicleBrand : ''}
                 {driver.vehicleBrand && driver.vehicleBrand !== 'Unknown' && driver.vehicleModel && driver.vehicleModel !== 'Unknown' ? ' ' : ''}
@@ -76,32 +71,38 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver, pickupCoords, on
               </span>
             </div>
           )}
-          
-          {driver.licenseNumber && (
-            <div className="text-xs text-gray-500 mt-1">
-              License: {driver.licenseNumber}
-            </div>
-          )}
         </div>
       </div>
       
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className={`w-3 h-3 rounded-full ${
+      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${
             driver.status === 'arrived' ? 'bg-green-500' : 
             driver.status === 'on-way' ? 'bg-yellow-500' : 'bg-blue-500'
           }`}></div>
-          <span className="font-medium">
+          <span className={`font-semibold text-sm ${
+            driver.status === 'arrived' ? 'text-green-700' : 
+            driver.status === 'on-way' ? 'text-yellow-700' : 'text-blue-700'
+          }`}>
             {driver.status === 'arrived' && 'Driver has arrived'}
-            {driver.status === 'on-way' && `${eta} min away`}
+            {driver.status === 'on-way' && (
+              <span>
+                {eta} min away
+                {pickupCoords && driver.coords && (
+                  <span className="text-gray-400 text-xs font-normal ml-1.5">
+                    • {(calculateDistance(driver.coords, pickupCoords) * 1000).toFixed(0)}m
+                  </span>
+                )}
+              </span>
+            )}
             {driver.status === 'accepted' && 'Driver accepted your ride'}
           </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {onCancel && (
             <button
               onClick={onCancel}
-              className="flex items-center space-x-1 text-red-500 hover:text-red-700 font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all font-semibold active:scale-95"
             >
               <i className="ri-close-circle-line"></i>
               <span>Cancel</span>
@@ -110,7 +111,7 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver, pickupCoords, on
           {driver.phone && (
             <a 
               href={`tel:${driver.phone}`}
-              className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-all font-semibold active:scale-95"
             >
               <i className="ri-phone-fill"></i>
               <span>Call</span>

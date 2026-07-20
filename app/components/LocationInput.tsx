@@ -33,7 +33,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       <input 
         type="text" 
         placeholder={placeholder}
-        className="w-full p-3.5 bg-slate-100 dark:bg-slate-800 border-none rounded-xl pl-12 pr-12 focus:ring-2 focus:ring-blue-500/50 outline-none text-sm font-medium transition-all shadow-sm group-hover:shadow-md text-slate-900 dark:text-slate-100 placeholder:text-slate-500"
+        className="w-full p-3.5 bg-white border-2 border-gray-200 rounded-xl pl-12 pr-12 focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/8 text-sm font-medium transition-all text-gray-900 placeholder:text-gray-400 group-hover:border-gray-300"
         value={value}
         onChange={onChange}
         onFocus={onFocus}
@@ -45,7 +45,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       {currentLocationHandler && (
         <button 
           onClick={currentLocationHandler}
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-700 rounded-full shadow-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:scale-105 active:scale-95"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-yellow-100 rounded-full text-gray-500 hover:text-gray-800 transition-all hover:scale-105 active:scale-95"
           title="Use current location"
           type="button"
         >
@@ -55,18 +55,18 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     </div>
     
     {showSuggestions && suggestions.length > 0 && (
-      <div className="absolute z-[60] w-full mt-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-xl max-h-56 overflow-auto hide-scrollbar overflow-y-auto">
+      <div className="absolute z-[60] w-full mt-1.5 bg-white border border-gray-200 rounded-2xl max-h-56 overflow-auto hide-scrollbar overflow-y-auto animate-slide-up" style={{boxShadow: 'var(--shadow-lg)'}}>
         {suggestions.map((item, index) => (
           <div 
             key={index}
-            className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-b-0 transition-colors"
+            className="group/item p-3.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all"
             onMouseDown={() => onSelect(item)}
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                <i className="ri-map-pin-line text-slate-500 dark:text-slate-400 text-sm"></i>
+              <div className="w-8 h-8 rounded-full bg-gray-100 group-hover/item:bg-yellow-100 flex items-center justify-center flex-shrink-0 transition-colors">
+                <i className="ri-map-pin-line text-gray-500 group-hover/item:text-gray-800 transition-colors text-sm"></i>
               </div>
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 line-clamp-1">{item.display}</span>
+              <span className="text-sm font-medium text-gray-700 line-clamp-1 group-hover/item:text-gray-900 transition-colors">{item.display}</span>
             </div>
           </div>
         ))}

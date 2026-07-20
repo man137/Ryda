@@ -7,6 +7,182 @@
   src: url(/public/fonts/Gilroy-Black.ttf);
 }
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ─── Light Premium Design Tokens ─────────────────────────────────────────── */
+:root {
+  /* Background */
+  --bg-base: #f7f8fa;
+  --bg-white: #ffffff;
+  --bg-subtle: #f1f3f6;
+
+  /* Text */
+  --text-primary: #0d0d0d;
+  --text-secondary: #4a5568;
+  --text-muted: #9ca3af;
+
+  /* Accent - Rapido/Ola Yellow */
+  --accent: #facc15;
+  --accent-hover: #eab308;
+
+  /* Success */
+  --success: #16a34a;
+  --success-light: #dcfce7;
+  --success-muted: #bbf7d0;
+
+  /* Error */
+  --error: #dc2626;
+  --error-light: #fef2f2;
+
+  /* Border */
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 4px 16px -2px rgb(0 0 0 / 0.10), 0 2px 6px -2px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 10px 32px -4px rgb(0 0 0 / 0.12), 0 4px 10px -4px rgb(0 0 0 / 0.06);
+  --shadow-float: 0 20px 48px -8px rgb(0 0 0 / 0.14), 0 8px 20px -8px rgb(0 0 0 / 0.08);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: #fef08a;
+  color: #0d0d0d;
+}
+
+/* ─── Scrollbars ─────────────────────────────────────────────────────────── */
+.hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+.scrollbar-thin { scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 9999px; }
+
+/* ─── Premium Card Utilities ─────────────────────────────────────────────── */
+.card-light {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.card-float {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-float);
+}
+
+.card-subtle {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+/* ─── Button Utilities ───────────────────────────────────────────────────── */
+.btn-accent {
+  background-color: var(--accent);
+  color: var(--text-primary);
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.btn-accent:hover {
+  background-color: var(--accent-hover);
+  box-shadow: 0 6px 20px rgba(234, 179, 8, 0.35);
+  transform: translateY(-1px);
+}
+.btn-accent:active { transform: translateY(0) scale(0.98); }
+
+.btn-dark {
+  background-color: var(--text-primary);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.btn-dark:hover {
+  background-color: #1a1a1a;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  transform: translateY(-1px);
+}
+.btn-dark:active { transform: translateY(0) scale(0.98); }
+
+/* ─── Input Utility ──────────────────────────────────────────────────────── */
+.input-light {
+  background: var(--bg-white);
+  border: 1.5px solid var(--border-strong);
+  color: var(--text-primary);
+  border-radius: 0.75rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input-light:focus {
+  outline: none;
+  border-color: #0d0d0d;
+  box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.07);
+}
+.input-light::placeholder { color: var(--text-muted); }
+
+/* ─── Badge Utilities ────────────────────────────────────────────────────── */
+.badge-success {
+  background-color: var(--success-light);
+  color: var(--success);
+  border: 1px solid var(--success-muted);
+}
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+.badge-error {
+  background-color: var(--error-light);
+  color: var(--error);
+  border: 1px solid #fecaca;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes ping-soft {
+  0% { transform: scale(1); opacity: 0.6; }
+  70%, 100% { transform: scale(1.8); opacity: 0; }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+.animate-ping-soft { animation: ping-soft 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.animate-slide-up { animation: slide-up 0.25s ease forwards; }
+.animate-fade-in { animation: fade-in 0.25s ease forwards; }
+
+/* ─── Force light mode ───────────────────────────────────────────────────── */
+html, html.dark { color-scheme: light; }
+
 @import 'remixicon/fonts/remixicon.css';
 @import "tw-animate-css";
 
@@ -88,14 +264,17 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  /* Deep midnight navy: #050b14 */
+  --background: oklch(0.18 0.02 260);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  /* Surface glass: #0d1930 */
+  --card: oklch(0.22 0.03 260);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.22 0.03 260);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  /* Emerald accent: #10d98a */
+  --primary: oklch(0.75 0.15 150);
+  --primary-foreground: oklch(0.1 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -105,20 +284,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --ring: oklch(0.75 0.15 150);
 }
 
 @layer base {
@@ -132,7 +298,22 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 shadow-[0_8px_32px_rgba(0,0,0,0.08)];
+    @apply bg-white/70 dark:bg-[#0d1930]/70 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)];
+  }
+  .glass-strong {
+    @apply bg-white/90 dark:bg-[#050b14]/90 backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-xl;
+  }
+  .neon-border {
+    @apply border border-emerald-500/30 shadow-[0_0_10px_rgba(16,217,138,0.2)] dark:shadow-[0_0_15px_rgba(16,217,138,0.15)];
+  }
+  .glow-emerald {
+    @apply shadow-[0_0_20px_rgba(16,217,138,0.3)] dark:shadow-[0_0_30px_rgba(16,217,138,0.2)];
+  }
+  .glow-violet {
+    @apply shadow-[0_0_20px_rgba(168,85,247,0.3)] dark:shadow-[0_0_30px_rgba(168,85,247,0.2)];
+  }
+  .text-glow {
+    text-shadow: 0 0 10px rgba(16, 217, 138, 0.5);
   }
   .hide-scrollbar {
     -ms-overflow-style: none;
@@ -141,4 +322,30 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Custom Animations */
+@keyframes mesh {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+.animate-mesh {
+  animation: mesh 15s ease infinite;
+  background-size: 200% 200%;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }

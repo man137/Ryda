@@ -41,14 +41,14 @@ export const Header: React.FC<HeaderProps> = ({
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-b border-slate-800/50 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200" style={{boxShadow: 'var(--shadow-sm)'}}>
       <div className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4">
         <div className="flex items-center gap-2 md:gap-4">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg group-hover:shadow-lg group-hover:shadow-emerald-500/50 transition-all duration-300">
-              <i className="text-lg md:text-xl text-white ri-taxi-line" aria-hidden="true"></i>
+            <div className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-black rounded-xl group-hover:bg-gray-800 transition-colors duration-200">
+              <i className="text-lg md:text-xl text-yellow-400 ri-taxi-line" aria-hidden="true"></i>
             </div>
-            <span className="hidden sm:inline font-bold text-xl md:text-2xl bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+            <span className="hidden sm:inline font-extrabold text-xl md:text-2xl text-gray-900 tracking-tight">
               Ryda
             </span>
           </Link>
@@ -59,26 +59,23 @@ export const Header: React.FC<HeaderProps> = ({
             <Link
               key={item.label}
               href={item.href}
-              className="text-sm lg:text-base font-medium text-slate-300 hover:text-emerald-400 transition-colors duration-200 relative group"
+              className="text-sm lg:text-base font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 relative group"
             >
               {item.label}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-emerald-300 group-hover:w-full transition-all duration-300"></span>
+              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300 rounded-full"></span>
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-4 md:gap-8">
-          {/* Language and Help - Hidden on smaller screens */}
-          <div className="hidden lg:flex items-center gap-6">
-            <button className="text-sm text-slate-300 hover:text-emerald-400 transition-colors duration-200">En</button>
-            <button className="text-sm text-slate-300 hover:text-emerald-400 transition-colors duration-200">
-              Help
-            </button>
+        <div className="flex items-center gap-4 md:gap-6">
+          <div className="hidden lg:flex items-center gap-5">
+            <button className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200">En</button>
+            <button className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200">Help</button>
           </div>
 
           <div className="flex items-center gap-3 md:gap-4">
             {status === "loading" ? (
-              <span className="text-sm text-slate-400">Loading...</span>
+              <span className="text-sm text-gray-400">Loading...</span>
             ) : session ? (
               <UserDropdown
                 username={session.user?.name || session.user?.email || ""}
@@ -91,12 +88,12 @@ export const Header: React.FC<HeaderProps> = ({
               <>
                 <Link
                   href="/login"
-                  className="hidden sm:inline-block text-sm font-medium text-slate-300 hover:text-emerald-400 transition-colors duration-200"
+                  className="hidden sm:inline-block text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors duration-200"
                 >
                   Login
                 </Link>
                 <Link href="/register">
-                  <button className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:shadow-emerald-500/30 hover:from-emerald-400 hover:to-emerald-500 transition-all duration-300 transform hover:scale-105">
+                  <button className="px-4 md:px-5 py-2 md:py-2.5 bg-yellow-400 hover:bg-yellow-300 text-gray-900 text-sm font-bold rounded-xl transition-all duration-200 hover:shadow-md active:scale-95">
                     Sign up
                   </button>
                 </Link>
@@ -106,33 +103,29 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+            className="md:hidden p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5 text-slate-300" /> : <Menu className="w-5 h-5 text-slate-300" />}
+            {mobileMenuOpen ? <X className="w-5 h-5 text-gray-700" /> : <Menu className="w-5 h-5 text-gray-700" />}
           </button>
         </div>
       </div>
 
       {mobileMenuOpen && (
-        <nav className="md:hidden border-t border-slate-800/50 bg-slate-900/95 backdrop-blur-sm">
-          <div className="flex flex-col px-4 py-3 gap-2">
+        <nav className="md:hidden border-t border-gray-100 bg-white">
+          <div className="flex flex-col px-4 py-3 gap-1">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-emerald-400 hover:bg-slate-800/50 rounded-lg transition-all duration-200"
+                className="px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-200"
               >
                 {item.label}
               </Link>
             ))}
-            <div className="border-t border-slate-800/50 mt-2 pt-2">
-              <button className="w-full px-3 py-2 text-sm text-slate-300 hover:text-emerald-400 transition-colors duration-200 text-left">
-                En
-              </button>
-              <button className="w-full px-3 py-2 text-sm text-slate-300 hover:text-emerald-400 transition-colors duration-200 text-left">
-                Help
-              </button>
+            <div className="border-t border-gray-100 mt-2 pt-2 flex gap-4">
+              <button className="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 text-left transition-colors">En</button>
+              <button className="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 text-left transition-colors">Help</button>
             </div>
           </div>
         </nav>

@@ -5,8 +5,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 type MapViewProps = {
-  pickupCoords: [number, number] | null;
-  destinationCoords: [number, number] | null;
   pickupCoords: [number, number] | null;
   destinationCoords: [number, number] | null;
   routeGeometry: {

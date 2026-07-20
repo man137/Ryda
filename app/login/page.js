@@ -1,3 +1,5 @@
+// app/login/page.js
+
 "use client";
 import { useState } from "react";
 import Link from "next/link";
@@ -28,7 +30,6 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState(VIEWS.LOGIN);
 
-  // Updated Login Handler using NextAuth
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,12 +46,11 @@ export default function LoginPage() {
         throw new Error("Please fill in all fields");
       }
 
-      // Use NextAuth's signIn instead of custom fetch
       const result = await signIn("credentials", {
         email,
         password,
         accountType,
-        redirect: false, // Don't redirect automatically
+        redirect: false,
       });
 
       if (result?.error) {
@@ -61,13 +61,10 @@ export default function LoginPage() {
         setMessage("Login successful!");
         setMessageType("success");
 
-        // Get the session to access user data
         const session = await getSession();
 
-        // Redirect based on account type
         let redirectUrl = "/";
         if (accountType === "driver") {
-          // Get driver ID from the session - should always be available
           const driverId = session?.user?.id;
           if (!driverId) {
             throw new Error("Driver ID not found in session");
@@ -75,10 +72,9 @@ export default function LoginPage() {
           redirectUrl = `/drivers/${driverId}`;
         }
 
-        // Small delay to show success message
         setTimeout(() => {
           router.push(redirectUrl);
-          router.refresh(); // Refresh to update session
+          router.refresh();
         }, 500);
       }
 
@@ -125,7 +121,7 @@ export default function LoginPage() {
 
       setMessage(
         result.message ||
-          "Password reset link sent! Check your email (including spam folder)."
+          "Password reset link sent! Check your email."
       );
       setMessageType("success");
 
@@ -142,17 +138,17 @@ export default function LoginPage() {
   };
 
   const AccountTypeToggle = (
-    <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
+    <div className="flex gap-1.5 mb-8 bg-gray-100 p-1.5 rounded-xl">
       <button
         type="button"
         onClick={() => {
           setAccountType("user");
           setMessage("");
         }}
-        className={`flex-1 py-3 px-4 rounded-md transition-all duration-200 font-medium ${
+        className={`flex-1 py-2.5 px-4 rounded-lg transition-all duration-200 font-semibold text-sm ${
           accountType === "user"
-            ? "bg-white text-blue-600 shadow-sm"
-            : "text-gray-600 hover:text-gray-800"
+            ? "bg-white text-gray-900 shadow-sm border border-gray-200"
+            : "text-gray-500 hover:text-gray-700"
         }`}
       >
         <div className="flex items-center justify-center gap-2">
@@ -166,10 +162,10 @@ export default function LoginPage() {
           setAccountType("driver");
           setMessage("");
         }}
-        className={`flex-1 py-3 px-4 rounded-md transition-all duration-200 font-medium ${
+        className={`flex-1 py-2.5 px-4 rounded-lg transition-all duration-200 font-semibold text-sm ${
           accountType === "driver"
-            ? "bg-white text-blue-600 shadow-sm"
-            : "text-gray-600 hover:text-gray-800"
+            ? "bg-white text-gray-900 shadow-sm border border-gray-200"
+            : "text-gray-500 hover:text-gray-700"
         }`}
       >
         <div className="flex items-center justify-center gap-2">
@@ -183,10 +179,10 @@ export default function LoginPage() {
   const MessageDisplay = (
     message && (
       <div
-        className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
+        className={`mb-6 p-4 rounded-xl flex items-start gap-3 text-sm font-medium ${
           messageType === "success"
-            ? "bg-green-50 text-green-800 border border-green-200"
-            : "bg-red-50 text-red-800 border border-red-200"
+            ? "badge-success"
+            : "badge-error"
         }`}
       >
         {messageType === "success" ? (
@@ -194,44 +190,39 @@ export default function LoginPage() {
         ) : (
           <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
         )}
-        <span className="text-sm">{message}</span>
+        <span>{message}</span>
       </div>
     )
   );
 
   const LoginForm = (
     <>
-      <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
-        Log in to your account
-      </h1>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-black text-gray-900 mb-1.5">Welcome back</h1>
+        <p className="text-gray-500 font-medium">Log in to your account</p>
+      </div>
 
       {MessageDisplay}
       {AccountTypeToggle}
 
-      <form onSubmit={handleLoginSubmit} className="space-y-4">
+      <form onSubmit={handleLoginSubmit} className="space-y-5">
         <div className="space-y-2">
-          <label
-            htmlFor="login-email"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Email *
+          <label htmlFor="login-email" className="block text-sm font-semibold text-gray-700">
+            Email Address
           </label>
           <input
             id="login-email"
             name="email"
             type="email"
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full input-light px-4 py-3.5 text-sm"
             placeholder="Enter your email"
           />
         </div>
 
         <div className="space-y-2 relative">
-          <label
-            htmlFor="login-password"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Password *
+          <label htmlFor="login-password" className="block text-sm font-semibold text-gray-700">
+            Password
           </label>
           <input
             id="login-password"
@@ -239,15 +230,15 @@ export default function LoginPage() {
             type={showPassword ? "text" : "password"}
             required
             minLength={6}
-            className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full input-light px-4 py-3.5 pr-12 text-sm"
             placeholder="Enter your password"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-9 text-gray-500 hover:text-gray-700 transition-colors"
+            className="absolute right-4 top-[38px] text-gray-400 hover:text-gray-700 transition-colors"
           >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
 
@@ -258,7 +249,7 @@ export default function LoginPage() {
               setViewMode(VIEWS.FORGOT_PASSWORD);
               setMessage("");
             }}
-            className="text-sm text-blue-600 hover:underline"
+            className="text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors"
           >
             Forgot password?
           </button>
@@ -267,11 +258,11 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
+          className="btn-accent w-full py-4 rounded-xl text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
         >
           {isSubmitting ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-900 border-t-transparent"></div>
               Logging in...
             </>
           ) : (
@@ -280,13 +271,10 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="mt-8 text-center">
-        <p className="text-sm text-gray-600">
+      <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+        <p className="text-gray-500 font-medium">
           Don&apos;t have an account?{" "}
-          <Link
-            href="/register"
-            className="text-blue-600 font-medium hover:underline"
-          >
+          <Link href="/register" className="text-gray-900 font-bold hover:underline ml-1">
             Sign up
           </Link>
         </p>
@@ -296,12 +284,14 @@ export default function LoginPage() {
 
   const ForgotPasswordForm = (
     <>
-      <h1 className="text-2xl font-bold mb-4 text-center text-gray-800">
-        Reset Your Password
-      </h1>
-      <p className="text-center text-gray-600 mb-6 text-sm">
-        Enter the email associated with your account to receive a reset link.
-      </p>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent text-glow mb-2">
+          Reset Password
+        </h1>
+        <p className="text-slate-400 font-medium">
+          Enter your email to receive a reset link
+        </p>
+      </div>
 
       {MessageDisplay}
       {AccountTypeToggle}
@@ -310,16 +300,16 @@ export default function LoginPage() {
         <div className="space-y-2">
           <label
             htmlFor="forgot-email"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-slate-300 ml-1"
           >
-            Email Address *
+            Email Address
           </label>
           <input
             id="forgot-email"
             name="email"
             type="email"
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3.5 bg-[#050b14]/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 text-slate-100 placeholder-slate-500 transition-all shadow-inner"
             placeholder="Enter your email"
           />
         </div>
@@ -327,29 +317,31 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
+          className="relative overflow-hidden w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-4 rounded-xl hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg glow-emerald active:scale-[0.98] font-bold text-lg flex items-center justify-center gap-2 group before:absolute before:inset-0 before:bg-white/20 before:opacity-0 hover:before:opacity-100 before:transition-opacity"
         >
-          {isSubmitting ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-              Sending Link...
-            </>
-          ) : (
-            "Send Reset Link"
-          )}
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                Sending Link...
+              </>
+            ) : (
+              "Send Reset Link"
+            )}
+          </span>
         </button>
       </form>
 
-      <div className="mt-6 text-center">
+      <div className="mt-8 pt-6 border-t border-white/10 text-center">
         <button
           type="button"
           onClick={() => {
             setViewMode(VIEWS.LOGIN);
             setMessage("");
           }}
-          className="text-sm text-blue-600 hover:underline flex items-center justify-center gap-1 mx-auto"
+          className="text-emerald-400 font-medium hover:text-emerald-300 hover:underline transition-colors flex items-center justify-center gap-2 mx-auto group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Login
         </button>
       </div>
@@ -357,26 +349,34 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <header className="bg-black text-white p-4 shadow-lg">
-        <div className="container mx-auto flex items-center">
+    <div className="font-sans w-screen min-h-screen overflow-hidden bg-[#f7f8fa] text-gray-900 flex flex-col">
+      {/* Subtle background */}
+      <div className="fixed inset-0 pointer-events-none -z-10 bg-[#f7f8fa]">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-yellow-100/60 blur-[80px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-blue-50/60 blur-[80px]" />
+      </div>
+
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50" style={{boxShadow: 'var(--shadow-sm)'}}>
+        <div className="container mx-auto flex items-center p-4">
           <Link
             href="/"
-            className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition-colors"
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-xl transition-all"
           >
             <ArrowLeft className="h-5 w-5" />
             <span className="sr-only">Back</span>
           </Link>
           <div className="mx-auto flex items-center gap-2">
-            <Car className="h-6 w-6 text-yellow-400" />
-            <span className="font-bold text-xl">Ryda</span>
+            <div className="flex items-center justify-center w-10 h-10 bg-black rounded-xl">
+              <i className="text-xl text-yellow-400 ri-taxi-line" aria-hidden="true"></i>
+            </div>
+            <span className="font-black text-2xl text-gray-900 tracking-tight">Ryda</span>
           </div>
           <div className="w-9" />
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 min-h-[450px]">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 relative z-10">
+        <div className="w-full max-w-md mx-auto card-float p-8 min-h-[450px]">
           {viewMode === VIEWS.LOGIN && LoginForm}
           {viewMode === VIEWS.FORGOT_PASSWORD && ForgotPasswordForm}
         </div>

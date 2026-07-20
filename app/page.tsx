@@ -35,8 +35,6 @@ import { WS_CONFIG } from "./constants";
 // Components
 import { Header } from "./components/Header";
 import { LocationInput } from "./components/LocationInput";
-import { GlassCard } from "./components/GlassCard";
-import { GlowButton } from "./components/GlowButton";
 import {
   Dialog,
   DialogContent,
@@ -136,11 +134,11 @@ function GlowButton({
 
   const variants = {
     primary:
-      "bg-gradient-to-r from-slate-900 to-slate-800 dark:from-white dark:to-slate-200 text-white dark:text-slate-900 shadow-lg shadow-black/10 dark:shadow-white/10 hover:shadow-xl hover:shadow-black/15 dark:hover:shadow-white/15 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
+      "bg-black text-white hover:bg-gray-800 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
     secondary:
-      "bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 active:scale-[0.98]",
+      "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98]",
     ghost:
-      "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 active:scale-[0.98]",
+      "text-gray-500 hover:bg-gray-100 active:scale-[0.98]",
   };
 
   return (
@@ -174,9 +172,7 @@ function GlassCard({
   padding?: string;
 }) {
   return (
-    <div
-      className={`rounded-2xl border border-white/20 dark:border-white/5 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-lg shadow-black/[0.02] dark:shadow-black/[0.08] ${padding} ${className}`}
-    >
+    <div className={`card-light ${padding} ${className}`}>
       {children}
     </div>
   );
@@ -907,12 +903,12 @@ export default function RideShareHome() {
   }
 
   return (
-    <div className="font-sans w-screen h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-50 selection:bg-blue-500/20 selection:text-blue-700 dark:selection:text-blue-300">
+    <div className="font-sans w-screen h-screen overflow-hidden bg-[#f7f8fa] text-gray-900 selection:bg-yellow-200 selection:text-gray-900">
       
-      {/* ─────── Ambient background glow ─────── */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-400/10 via-indigo-400/5 to-transparent blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-emerald-400/10 via-teal-400/5 to-transparent blur-3xl" />
+      {/* ─────── Subtle background ─────── */}
+      <div className="fixed inset-0 pointer-events-none -z-10 bg-[#f7f8fa]">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-yellow-100/60 blur-[80px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-blue-50/60 blur-[80px]" />
       </div>
 
       {/* ─────── Header ─────── */}
@@ -942,17 +938,15 @@ export default function RideShareHome() {
             
             {/* ── Title ── */}
             <motion.div variants={fadeUp} className="mb-6 sm:mb-8">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                  <Car className="w-4 h-4 text-white" />
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center shadow-md">
+                  <Car className="w-5 h-5 text-yellow-400" />
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                  <span className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
-                    Where to?
-                  </span>
+                <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900">
+                  Where to?
                 </h1>
               </div>
-              <p className="text-sm text-slate-400 dark:text-slate-500 ml-10">
+              <p className="text-sm text-gray-500 ml-14">
                 Get a reliable ride in minutes.
               </p>
             </motion.div>
@@ -1049,9 +1043,9 @@ export default function RideShareHome() {
                       />
                     </GlassCard>
 
-                    <div className="flex justify-center -my-2 relative z-10">
-                      <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-md">
-                        <ChevronRight className="w-4 h-4 text-slate-400 rotate-90" />
+                    <div className="flex justify-center -my-3 relative z-10">
+                      <div className="w-8 h-8 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm">
+                        <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
                       </div>
                     </div>
 
